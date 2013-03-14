@@ -59,13 +59,13 @@ for i=1:m
     MeanX(i,1) = 255*(Xmean(i) -minimum)/(maximum-minimum);
 end
 
-img = reshape(uint8(MeanX), fdim);
-img=rot90(img);
-img=rot90(img);
-img=rot90(img);
-img=fliplr(img);
-imshow(img);
-pause(0.5)
+% img = reshape(uint8(MeanX), fdim);
+% img=rot90(img);
+% img=rot90(img);
+% img=rot90(img);
+% img=fliplr(img);
+% %imshow(img);
+% pause(0.5)
 
 %Range of random values
 rand_min=1;
@@ -77,7 +77,7 @@ rand_max=10;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for j=1:set      
      %for p =1:rand_max
-        r = round(rand_min + (rand_max-rand_min) .* rand(1,1));
+        r = round(rand_min + (rand_max-rand_min) .* rand(1,1))
         %Train the network
         X  = reshape(double(XI(r,j,:)),[],1);
         rX = reshape(double(XI(r,10,:)),[],1);
@@ -98,20 +98,31 @@ for j=1:set
         Y = W * X;
         W = eta * (( W * (rX) *(rX')) - (tril(Y*Y')*W));
             
-%         max(max(W))
+         max(max(W))
      %end
 end
-r
+ r
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Test Phase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+counter =1;
 for i =1:rand_max %For each digit
     
     %Get input
     X  = reshape(double(XI(i,41,:)),[],1);
+     %Display the result
+    img = reshape(uint8(X), fdim);
+    img=rot90(img);
+    img=rot90(img);
+    img=rot90(img);
+    img=fliplr(img);
+    subplot(ceil(rand_max), 4,counter);
+    imshow(img);
+    counter=counter+1;
+    %Paused to revise the result: 
     
      %Center
       X = X-double(MeanX);
@@ -141,12 +152,12 @@ for i =1:rand_max %For each digit
     end
     
     %Display the result
+    subplot(ceil(rand_max), 4,counter);
     img = reshape(r, fdim);
     img=rot90(img);
     img=rot90(img);
     img=rot90(img);
     img=fliplr(img);
     imshow(img);
-    
-     pause(0.5)%Paused to revise the result: 
+    counter= counter+1;
 end
