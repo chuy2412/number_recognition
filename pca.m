@@ -5,12 +5,20 @@ clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
-l = 60;                  %l the number of principal components
-set=1000;
-W = (0.01/(m))*rand(l,m);       %Randomly initialize the Weights
-Y = double(ones(l));    
-eta = 0.0001/(m-(set*0.55));              %Learning rate
+l = 100;                  %l the number of principal components
+set=100;
+% W = (0.01/(m))*rand(l,m);       %Randomly initialize the Weights
+% W = 0.01*rand(l,m);
+W = 0.01*rand(l,m);
+Y = double(zeros(l));    
+% eta = 0.0001/(m-(set*0.55));              %Learning rate
+eta = 0.002/(m); 
+train =4;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%Range of random values
+rand_min=1;
+rand_max=2; 
+
 dimension = [28,28];
 pixels = m;
 newdim = [1,pixels];
@@ -67,9 +75,7 @@ end
 % %imshow(img);
 % pause(0.5)
 
-%Range of random values
-rand_min=1;
-rand_max=10; 
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,10 +83,10 @@ rand_max=10;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for j=1:set      
      %for p =1:rand_max
-        r = round(rand_min + (rand_max-rand_min) .* rand(1,1))
+        r = round(rand_min + (rand_max-rand_min) .* rand(1,1));
         %Train the network
         X  = reshape(double(XI(r,j,:)),[],1);
-        rX = reshape(double(XI(r,10,:)),[],1);
+        rX = reshape(double(XI(r,1,:)),[],1);
             
         %Center
         X = X-double(MeanX);
@@ -93,15 +99,18 @@ for j=1:set
         end
         
         X=double(nX);
-        
-        %Update law    
-        Y = W * X;
-        W = eta * (( W * (rX) *(rX')) - (tril(Y*Y')*W));
+        for q=1:train
+               %Update law    
+               Y = W * X;
+               dW = eta * (( W * (rX) *(rX')) - (tril(Y*Y')*W));
+               W = ((set -1)/set * W ) + ((1/set)*dW);
             
-         max(max(W))
+%             max(max(W));
+%              norm(W)
+        end
      %end
 end
- r
+%   r
 
 
 
@@ -112,7 +121,7 @@ counter =1;
 for i =1:rand_max %For each digit
     
     %Get input
-    X  = reshape(double(XI(i,41,:)),[],1);
+    X  = reshape(double(XI(i,1,:)),[],1);
      %Display the result
     img = reshape(uint8(X), fdim);
     img=rot90(img);
