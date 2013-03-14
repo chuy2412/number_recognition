@@ -5,22 +5,18 @@ clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
-l = 15;                  %l the number of principal components
-train=10;                 %The number of epochs to train the weights W
-W = 0.01/m*rand(l,m);       %Randomly initialize the Weights
-eta = 0.0001/m;              %Learning rate
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Load data
-I = load('mnist_all.mat');
-%Variables
-set=100;
-totalImages = set;%*10;
+l = 60;                  %l the number of principal components
+set=1000;
+W = (0.01/(m))*rand(l,m);       %Randomly initialize the Weights
+Y = double(ones(l));    
+eta = 0.0001/(m-(set*0.55));              %Learning rate
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 dimension = [28,28];
 pixels = m;
-dim  = [totalImages,pixels];
 newdim = [1,pixels];
-Y = double(ones(l,1));          %Y matrix
 
+%Load data
+I = load('mnist_all.mat');
 XI = uint8(zeros(10,set,pixels));
 XI(1,:,:) = I.train1(1:set,:);
 XI(2,:,:) = I.train2(1:set,:);
@@ -35,44 +31,24 @@ XI(10,:,:) = I.train0(1:set,:);
 
 X = double(zeros(m));
 
-%Get all the inputs
-nMean1 = reshape(mean(XI(1,1:set,:),2),[],1);
-nMean2 = reshape(mean(XI(2,1:set,:),2),[],1);
+%Calculate the mean of each set
+M0 = reshape(mean(XI(10,1:set,:),2),[],1);
+M1 = reshape(mean(XI(1,1:set,:),2),[],1);
+M2 = reshape(mean(XI(2,1:set,:),2),[],1);
+M3 = reshape(mean(XI(3,1:set,:),2),[],1);
+M4 = reshape(mean(XI(4,1:set,:),2),[],1);
+M5 = reshape(mean(XI(5,1:set,:),2),[],1);
+M6 = reshape(mean(XI(6,1:set,:),2),[],1);
+M7 = reshape(mean(XI(7,1:set,:),2),[],1);
+M8 = reshape(mean(XI(8,1:set,:),2),[],1);
+M9 = reshape(mean(XI(9,1:set,:),2),[],1);
 
-newMean = mean((nMean1 + nMean2),2);
-t=1;
-a=1;
-b=2; 
-for j=1:set      
-     for p =1:2
-        r = round(a + (b-a) .* rand(1,1));
-        %Train the network
-        X  = reshape(double(XI(r,j,:)),[],1);
-        rX = reshape(double(XI(r,1,:)),[],1);
-            
-        %Center
-        X = X-newMean;
-        nX = uint8(X);
-        minimum = min(X);  %get minimum
-        maximum = max(X);  %get maximum
-        for z=1:m
-            %Normalize pixel from 0-255
-            nX(z,1) = 255*(X(z) -minimum)/(maximum-minimum);
-        end
-        
-        X=double(nX);
-        
-        %Update law    
-        Y = W * X;
-        W = eta * (( W * (rX) *(rX')) - (tril(Y*Y')*W));
-            
-%         max(max(W))
-     end
-end
-r
+
+%Calculate the total mean
+newMean = mean((M0 + M1 + M2 + M3 + M4 + M5 + M6 +M7 +M8 + M9),2);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Scale the mean so that the values are from 0-255
-%Functionality has been tested and it works fine
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Xmean = newMean;
 MeanX = uint8(Xmean);
@@ -89,22 +65,71 @@ img=rot90(img);
 img=rot90(img);
 img=fliplr(img);
 imshow(img);
-pause (2.5)
+pause(0.5)
+
+%Range of random values
+rand_min=1;
+rand_max=10; 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Training phase
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+for j=1:set      
+     %for p =1:rand_max
+        r = round(rand_min + (rand_max-rand_min) .* rand(1,1));
+        %Train the network
+        X  = reshape(double(XI(r,j,:)),[],1);
+        rX = reshape(double(XI(r,10,:)),[],1);
+            
+        %Center
+        X = X-double(MeanX);
+        nX = uint8(X);
+        minimum = min(X);  %get minimum
+        maximum = max(X);  %get maximum
+        for z=1:m
+            %Normalize pixel from 0-255
+            nX(z,1) = 255*(X(z) -minimum)/(maximum-minimum);
+        end
+        
+        X=double(nX);
+        
+        %Update law    
+        Y = W * X;
+        W = eta * (( W * (rX) *(rX')) - (tril(Y*Y')*W));
+            
+        max(max(W))
+     %end
+end
+r
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Show the results
+%Test Phase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%newX = (W'*Y);
-%min(newMean)
-%max(newMean)
-for i =1:1 %For each image
-%for i=1:l
-    %Calculate the result
-    X  = reshape(double(XI(6,10,:)),[],1);
+for i =1:1%rand_max %For each digit
+    
+    %Get input
+    X  = reshape(double(XI(i,41,:)),[],1);
+    
+     %Center
+     X = X-newMean;
+     
+     %Normalize (0-255)
+     nX = uint8(X);
+     minimum = min(X);  %get minimum
+     maximum = max(X);  %get maximum
+     for z=1:m
+        %Normalize pixel from 0-255
+        nX(z,1) = 255*(X(z) -minimum)/(maximum-minimum);
+     end    
+    X=double(nX);
+    
+    
     newY = W * X;
-     Result = W(:,:)'*Y;%+ double(MeanX);
-    %Result = W(:,:)'*newY;%+ double(MeanX);
+    %Result = W(:,:)'*Y;%+ double(MeanX);
+    Result = W'*newY; %- (W' *Y);
     
     
     %Scale the result from 0-255 per pixel to display the result
@@ -116,18 +141,6 @@ for i =1:1 %For each image
         r(c,1) = 255*(Result(c,1) -minimum)/(maximum-minimum);
     end
     
-%     Result = double(r) + double(MeanX);
-%     
-%     r = uint8(Result);
-%     minimum = min(Result);  %get minimum
-%     maximum = max(Result);  %get maximum
-%     for c=1:m
-%         %Normalize pixel from 0-255
-%         r(c,1) = 255*(Result(c,1) -minimum)/(maximum-minimum);
-%     end
-%     
-    
-    
     %Display the result
     img = reshape(r, fdim);
     img=rot90(img);
@@ -136,5 +149,5 @@ for i =1:1 %For each image
     img=fliplr(img);
     imshow(img);
     
-     pause%Paused to revise the result: 
+     pause(0.5)%Paused to revise the result: 
 end
