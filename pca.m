@@ -98,7 +98,7 @@ for j=1:set
         Y = W * X;
         W = eta * (( W * (rX) *(rX')) - (tril(Y*Y')*W));
             
-        max(max(W))
+%         max(max(W))
      %end
 end
 r
@@ -108,13 +108,13 @@ r
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Test Phase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for i =1:1%rand_max %For each digit
+for i =1:rand_max %For each digit
     
     %Get input
     X  = reshape(double(XI(i,41,:)),[],1);
     
      %Center
-     X = X-newMean;
+      X = X-double(MeanX);
      
      %Normalize (0-255)
      nX = uint8(X);
@@ -128,8 +128,7 @@ for i =1:1%rand_max %For each digit
     
     
     newY = W * X;
-    %Result = W(:,:)'*Y;%+ double(MeanX);
-    Result = W'*newY; %- (W' *Y);
+    Result = (W'*newY );% (W' *Y);
     
     
     %Scale the result from 0-255 per pixel to display the result
