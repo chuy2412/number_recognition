@@ -5,17 +5,20 @@ clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
-l = 100;                  %l the number of principal components
-set=3000;
+l = 160;                  %l the number of principal components
+set=4000;
+% W = 0.001*rand(l,m);
 W = 0.01*rand(l,m);
 Y = double(zeros(l));    
-% eta = 0.0001/(m-(set*0.55));              %Learning rate
-eta = 0.0100/(m); 
-train =6;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %Range of random values
 rand_min=1;
 rand_max=10; 
+train =3;
+  eta = 0.0065/(m); 
+%   eta = (0.00001/(m))/((set/rand_max)); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
 
 dimension = [28,28];
 pixels = m;
@@ -52,6 +55,7 @@ M9 = reshape(mean(XI(9,1:set,:),2),[],1);
 
 %Calculate the total mean
 newMean = mean((M0 + M1 + M2 + M3 + M4 + M5 + M6 +M7 +M8 + M9),2);
+%newMean = mean((M1 +M2),2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Scale the mean so that the values are from 0-255
@@ -75,15 +79,19 @@ end
 
 
 
-
+cnt =1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Training phase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for j=1:set      
      %for p =1:rand_max
         r = round(rand_min + (rand_max-rand_min) .* rand(1,1));
+%         if(j==1)
+%             r
+%         end
+%         r=p;
         %Train the network
-        X  = reshape(double(XI(r,j,:)),[],1);
+        X  = reshape(double(XI(r,1,:)),[],1);
         rX = reshape(double(XI(r,1,:)),[],1);
             
         %Center
@@ -97,18 +105,24 @@ for j=1:set
         end
         
         X=double(nX);
+        
         for q=1:train
                %Update law    
                Y = W * X;
                dW = eta * (( W * (rX) *(rX')) - (tril(Y*Y')*W));
-               W = ((set -1)/set * W ) + ((1/set)*dW);
+%                  W = ((cnt -1)/cnt * W ) + ((1/cnt)*dW);
+                  W = ((set -1)/set * W ) + ((1/set)*dW);
+
             
 %             max(max(W));
 %              norm(W)
+                
         end
+%          cnt=cnt+1;
+         
      %end
 end
-%   r
+   r
 
 
 
@@ -122,14 +136,14 @@ for i =1:rand_max %For each digit
     %Get input
    
     ra = round(rand_min + (r_max-rand_min) .* rand(1,1));
-    X  = reshape(double(XI(i,ra,:)),[],1);
+    X  = reshape(double(XI(i,1,:)),[],1);
      %Display the result
     img = reshape(uint8(X), fdim);
     img=rot90(img);
     img=rot90(img);
     img=rot90(img);
     img=fliplr(img);
-    subplot(ceil(rand_max), 4,counter);
+    subplot(rand_max, 4,counter);
     
     strnum = int2str(i);
 
@@ -165,7 +179,7 @@ for i =1:rand_max %For each digit
     end
     
     %Display the result
-    subplot(ceil(rand_max), 4,counter);
+    subplot(rand_max, 4,counter);
     img = reshape(r, fdim);
     img=rot90(img);
     img=rot90(img);
