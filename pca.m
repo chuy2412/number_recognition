@@ -6,18 +6,16 @@ clear all
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
 l = 100;                  %l the number of principal components
-set=100;
-% W = (0.01/(m))*rand(l,m);       %Randomly initialize the Weights
-% W = 0.01*rand(l,m);
+set=3000;
 W = 0.01*rand(l,m);
 Y = double(zeros(l));    
 % eta = 0.0001/(m-(set*0.55));              %Learning rate
-eta = 0.002/(m); 
-train =4;
+eta = 0.0100/(m); 
+train =6;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %Range of random values
 rand_min=1;
-rand_max=2; 
+rand_max=10; 
 
 dimension = [28,28];
 pixels = m;
@@ -118,10 +116,13 @@ end
 %Test Phase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 counter =1;
+r_max = set;
 for i =1:rand_max %For each digit
     
     %Get input
-    X  = reshape(double(XI(i,1,:)),[],1);
+   
+    ra = round(rand_min + (r_max-rand_min) .* rand(1,1));
+    X  = reshape(double(XI(i,ra,:)),[],1);
      %Display the result
     img = reshape(uint8(X), fdim);
     img=rot90(img);
@@ -129,6 +130,9 @@ for i =1:rand_max %For each digit
     img=rot90(img);
     img=fliplr(img);
     subplot(ceil(rand_max), 4,counter);
+    
+    strnum = int2str(i);
+
     imshow(img);
     counter=counter+1;
     %Paused to revise the result: 
@@ -168,5 +172,6 @@ for i =1:rand_max %For each digit
     img=rot90(img);
     img=fliplr(img);
     imshow(img);
+    title(['Output '  strnum]);
     counter= counter+1;
 end
