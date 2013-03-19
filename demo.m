@@ -1,7 +1,9 @@
 clear all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Values that can be edited to improve performance of the adaptive PCA
+%Demonstration for number recognition using PCA and ICA
+%Author: Jesus Rivera
+%Values that can be edited to improve performance of ICA and PCA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
@@ -58,8 +60,8 @@ M9 = reshape(mean(XI(9,1:set,:),2),[],1);
 
 
 %Calculate the total mean
-%newMean = mean((M0 + M1 + M2 + M3 + M4 + M5 + M6 +M7 +M8 + M9),2);
-newMean = mean((M1 +M2),2);
+newMean = mean((M0 + M1 + M2 + M3 + M4 + M5 + M6 +M7 +M8 + M9),2);
+%newMean = mean((M1 +M2),2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Scale the mean so that the values are from 0-255
