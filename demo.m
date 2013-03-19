@@ -5,18 +5,20 @@ clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
-l = 100;                  %l the number of principal components
-set=2;%4000;
-% W = 0.001*rand(l,m);
-W = 0.000001/m*rand(l,m);
+l = 160;                  %l the number of principal components
+set=4200;
+ W_ICA = 0.01*rand(l,m);
+ W_PCA = 0.01*rand(l,m);
+%W = 0.0001/m*rand(l,m);
 Y = double(zeros(l));    
 %Range of random values
 rand_min=1;
-rand_max=1; 
-train =20;
+rand_max=10; 
+train =3;
  % eta = 0.0065/(m); 
- eta = 0.4;
-%   eta = (0.00001/(m))/((set/rand_max)); 
+ eta_ICA = 0.00000000000003;
+ eta_PCA = 0.0065/(m); 
+ %   eta = (0.00001/(m))/((set/rand_max)); 
 
 error=1e-2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
@@ -41,13 +43,6 @@ XI(9,:,:) = I.train9(1:set,:);
 XI(10,:,:) = I.train0(1:set,:);
 
 X = double(zeros(m));
-newX = [XI(1,1,:) XI(2,1,:) XI(3,1,:) XI(4,1,:)...
-        XI(5,1,:) XI(6,1,:) XI(7,1,:) XI(8,1,:)...
-        XI(9,1,:) XI(10,1,:)];
-    
-newX = double(reshape(newX,[],10));
-tempX = double(reshape(XI(1,1,:),[],1));
-
 
 %Calculate the mean of each set
 M0 = reshape(mean(XI(10,1:set,:),2),[],1);
@@ -63,8 +58,8 @@ M9 = reshape(mean(XI(9,1:set,:),2),[],1);
 
 
 %Calculate the total mean
-newMean = mean((M0 + M1 + M2 + M3 + M4 + M5 + M6 +M7 +M8 + M9),2);
-%newMean = mean((M1 +M2),2);
+%newMean = mean((M0 + M1 + M2 + M3 + M4 + M5 + M6 +M7 +M8 + M9),2);
+newMean = mean((M1 +M2),2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Scale the mean so that the values are from 0-255
@@ -86,8 +81,8 @@ end
 % %imshow(img);
 % pause(0.5)
 
-
-
+% [comp ignore] = size(y);
+I = eye(l);
 cnt =1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Training phase
@@ -114,22 +109,26 @@ for j=1:set
         end
         
         X=double(nX);
-        size(W);
+        size(W_ICA);
         for q=1:train
+            
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %ICA
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %Demixing X with W
-                y=W*X;
-                [comp ignore] = size(y);
+                y_ICA=W_ICA*X;
+                
                 %Activation function 4 from the supplemental notes
                 %f=(3/4)*y.^11+(25/4)*y.^9+(-14/3)*y.^7+(-47/4)*y.^5+(29/4)*y.^3;
-                f = y.^3;
-                I = eye(comp);
-                dW=(I-f*y')*W * eta;
-                ndW = norm(dW)
+                f = y_ICA.^3;
+                
+                dW=(I-f*y_ICA')*W_ICA * eta_ICA;
+%                 ndW = norm(dW);
                 %Update the weight
-                W =  W + dW;
+                 W_ICA = W_ICA + dW;
 
                 % Break if Algorithm diverges
-                if (sum(sum(isnan(W)))>0) flag=1; 
+                if (sum(sum(isnan(W_ICA)))>0) flag=1; 
                     break;
                 end
                 max(max(abs(dW)));
@@ -139,19 +138,19 @@ for j=1:set
             
             
             
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %PCA
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
+               %Update law    
+               Y_PCA = W_PCA * X;
+               dW = eta_PCA *...
+                    (( W_PCA * (rX) *(rX')) - (tril(Y_PCA*Y_PCA')*W_PCA));
+               W_PCA = ((set -1)/set * W_PCA ) + ((1/set)*dW);
+
             
-            %PCA
-            
-%                %Update law    
-%                Y = W * X;
-%                dW = eta * (( W * (rX) *(rX')) - (tril(Y*Y')*W));
-% %                  W = ((cnt -1)/cnt * W ) + ((1/cnt)*dW);
-%                   W = ((set -1)/set * W ) + ((1/set)*dW);
-% 
-%             
-% %             max(max(W));
-% %              norm(W)
-% 
+%             max(max(W));
+%              norm(W)
+
 
         end
          
@@ -179,7 +178,7 @@ for i =1:rand_max %For each digit
     img=rot90(img);
     img=rot90(img);
     img=fliplr(img);
-    subplot(rand_max, 4,counter);
+    subplot(rand_max, 3,counter);
     
     strnum = int2str(i);
 
@@ -188,7 +187,7 @@ for i =1:rand_max %For each digit
     %Paused to revise the result: 
     
      %Center
-     % X = X-double(MeanX);
+      X = X-double(MeanX);
      
      %Normalize (0-255)
      nX = uint8(X);
@@ -198,13 +197,12 @@ for i =1:rand_max %For each digit
         %Normalize pixel from 0-255
         nX(z,1) = 255*(X(z) -minimum)/(maximum-minimum);
      end    
-    X=double(nX);
+     X=double(nX);
     
     
-     newY = W * X;
-     Result = (W'*newY );% (W' *Y);
-%       newY = W_ICA *X;
-%       Result = (W_ICA' * newY);
+     Y_PCA = W_PCA * X;
+     Result = (W_PCA'*Y_PCA );% (W' *Y);
+
     
     
     %Scale the result from 0-255 per pixel to display the result
@@ -217,13 +215,38 @@ for i =1:rand_max %For each digit
     end
     
     %Display the result
-    subplot(rand_max, 4,counter);
+    subplot(rand_max, 3,counter);
     img = reshape(r, fdim);
     img=rot90(img);
     img=rot90(img);
     img=rot90(img);
     img=fliplr(img);
     imshow(img);
-    title(['Output '  strnum]);
+    title(['Output PCA'  strnum]);
     counter= counter+1;
+    
+     Y_ICA = W_ICA * X;
+     Result = (W_ICA'*Y_ICA );% (W' *Y);
+
+    %Scale the result from 0-255 per pixel to display the result
+    r = uint8(Result);
+    minimum = min(Result);  %get minimum
+    maximum = max(Result);  %get maximum
+    for c=1:m
+        %Normalize pixel from 0-255
+        r(c,1) = 255*(Result(c,1) -minimum)/(maximum-minimum);
+    end
+    
+    %Display the result
+    subplot(rand_max, 3,counter);
+    img = reshape(r, fdim);
+    img=rot90(img);
+    img=rot90(img);
+    img=rot90(img);
+    img=fliplr(img);
+    imshow(img);
+    title(['Output ICA'  strnum]);
+    counter= counter+1;
+    
+    
 end
