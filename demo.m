@@ -4,6 +4,7 @@ clear all
 %Demonstration for number recognition using PCA and ICA
 %Author: Jesus Rivera
 %Values that can be edited to improve performance of ICA and PCA
+%Please allow a couple of minutes to compute the results
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
