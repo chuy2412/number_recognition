@@ -7,7 +7,9 @@ function trainNetwork_Phase1_PCA(set,train, pc)
 %Training phase
 %Values that can be edited to improve performance of PCA
 %Input:
-%   set - number of training sets
+%   set   - number of training sets
+%   train - number of training steps per set
+%   pc    - principal components
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
