@@ -1,4 +1,4 @@
-function testNetwork_PCA(W_PCA,set)
+function testNetwork_Phase1_PCA(W_PCA,set)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Test Phase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

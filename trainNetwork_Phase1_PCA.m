@@ -1,4 +1,4 @@
-function trainNetwork_PCA(set)
+function trainNetwork_Phase1_PCA(set,train, pc)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Training Phase
 %Author: Jesus Rivera
@@ -11,23 +11,21 @@ function trainNetwork_PCA(set)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fdim = [28,28];        %Dimentsion to show the image
 m = 28*28;             %m dimension
-l = 160;                  %l the number of principal components
+l = pc;                  %l the number of principal components
 %set=100 %4200;
- W_ICA = 0.01*rand(l,m);
- W_PCA = 0.01*rand(l,m);
+W_PCA = 0.01*rand(l,m);
 %W = 0.0001/m*rand(l,m);
 Y = double(zeros(l));    
 %Range of random values
 rand_min=1;
 rand_max=10; 
-train =3;
  % eta = 0.0065/(m); 
- eta_ICA = 0.00000000000003;
- eta_PCA = 0.0065/(m); 
- %   eta = (0.00001/(m))/((set/rand_max)); 
+eta_PCA = 0.0065/(m);  
+ %   eta = (0.00001/(m))/((set/rand_max));
+ 
+ filename = ['db_set' int2str(set) '_train' int2str(train) ...
+             '_PC_' int2str(pc)];
 
-parameters = 2;
-error=1e-2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 
 
@@ -102,7 +100,8 @@ for j=1:set
         rX = reshape(double(XI(r,1,:)),[],1);
         
         %Inverse
-        X = imcomplement(X);    
+        X = imcomplement(X);  
+        rX = imcomplement(rX);
         
         %Center
         X = X-double(MeanX);
@@ -115,7 +114,6 @@ for j=1:set
         end
         
         X=double(nX);
-        size(W_ICA);
         for q=1:train       
               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               %PCA
@@ -128,4 +126,4 @@ for j=1:set
         end
 end
   % r
-save ('W_PCA');
+save (filename);
