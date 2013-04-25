@@ -1,4 +1,4 @@
-function trainNetwork_Phase1_PCA(set,train, pc)
+function trainNetwork_Phase1_PCA(cycle,set,repeat,train, pc,filename)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Training Phase
 %Author: Jesus Rivera
@@ -22,11 +22,16 @@ Y = double(zeros(l));
 rand_min=1;
 rand_max=10; 
  % eta = 0.0065/(m); 
-eta_PCA = 0.0065/(m);  
+eta_PCA = 0.0065/m;  
  %   eta = (0.00001/(m))/((set/rand_max));
  
- filename = ['db_set' int2str(set) '_train' int2str(train) ...
-             '_PC_' int2str(pc)];
+ %filename = ['db_set' int2str(set) '_train' int2str(train) ...
+ %            '_PC_' int2str(pc)];
+
+if set>5800
+    set=5800;
+    
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 
@@ -90,42 +95,46 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Training phase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for j=1:set      
-     %for p =1:rand_max
-        r = round(rand_min + (rand_max-rand_min) .* rand(1,1));
-%         if(j==1)
-%             r
-%         end
-%         r=p;
-        %Train the network
-        X  = reshape(double(XI(r,1,:)),[],1);
-        rX = reshape(double(XI(r,1,:)),[],1);
+for c=1:cycle   
+    for j=1:set      
+         for p =1:repeat
+            %pick a random number
+            %r = round(rand_min + (rand_max-rand_min) .* rand(1,1));
+
+            %New random input
+            X  = reshape(double(XI(p,1,:)),[],1);
         
-        %Inverse
-        X = imcomplement(X);  
-        rX = imcomplement(rX);
+            %Desire output
+            rX = reshape(double(XI(p,1,:)),[],1);
         
-        %Center
-        X = X-double(MeanX);
-        nX = uint8(X);
-        minimum = min(X);  %get minimum
-        maximum = max(X);  %get maximum
-        for z=1:m
-            %Normalize pixel from 0-255
-            nX(z,1) = 255*(X(z) -minimum)/(maximum-minimum);
-        end
+            %Center
+            X = X-double(MeanX);
+            nX = uint8(X);
+            minimum = min(X);  %get minimum
+            maximum = max(X);  %get maximum
+            for z=1:m
+                %Normalize pixel from 0-255
+                nX(z,1) = 255*(X(z) -minimum)/(maximum-minimum);
+            end
         
-        X=double(nX);
-        for q=1:train       
-              %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-              %PCA
-              %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
-               %Update law    
-               Y_PCA = W_PCA * X;
-               dW = eta_PCA *...
-                    (( W_PCA * (rX) *(rX')) - (tril(Y_PCA*Y_PCA')*W_PCA));
-               W_PCA = ((set -1)/set * W_PCA ) + ((1/set)*dW);
-        end
+            X=double(nX);
+            %Spiral image
+            X = spiral_Image(X);
+            rX= spiral_Image(rX);
+            for q=1:train       
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %PCA
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
+                %Update law    
+                Y_PCA = W_PCA * X;
+                dW = (eta_PCA * (( W_PCA * (rX) *(rX')) - (tril(Y_PCA*Y_PCA')*W_PCA)));
+%                  W_PCA = ((set-1)/(set) * W_PCA )...
+%                           + ((1/(set))*dW);
+                       %W_PCA = double(uint8(((cT-1)/(cT) * W_PCA ) + ((1/(cT))*dW)));
+                       %W_PCA = double(uint8(((set+repeat-1)/(set+repeat) * W_PCA ) + ((1/(set+repeat))*dW)));
+                       W_PCA =((set+repeat-1)/(set+repeat) * W_PCA ) + ((1/(set+repeat))*dW);
+            end
+         end
+    end
 end
-  % r
-save (filename);
+save (filename, 'W_PCA');

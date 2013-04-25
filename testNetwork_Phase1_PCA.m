@@ -62,18 +62,17 @@ end
  %imshow(img);
  %pause
 
- 
+%Load the RBF net
+% net = load('rbf_net.mat');
 for i =1:rand_max %For each digit
     
-    %Get input
-   
+    %Get input  
     ra = round(rand_min + (r_max-rand_min) .* rand(1,1));
     X  = reshape(double(XI(i,1,:)),[],1);
+    
      %Display the result
     img = reshape(uint8(X), fdim);
     
-    %Invert the image
-    img = imcomplement(img);
     img=rot90(img);
     img=rot90(img);
     img=rot90(img);
@@ -96,11 +95,17 @@ for i =1:rand_max %For each digit
      for z=1:m
         %Normalize pixel from 0-255
         nX(z,1) = 255*(X(z) -minimum)/(maximum-minimum);
-     end    
+     end 
+
      X=double(nX);
+          
+     %Spiral image
+     X = spiral_Image(X);
         
      Y_PCA = W_PCA * X;
-     Result = (W_PCA' * Y_PCA );% (W' *Y);    
+     Result = (W_PCA' * Y_PCA );% (W' *Y); 
+     
+     p=mean(Result);
     
     %Scale the result from 0-255 per pixel to display the result
     r = uint8(Result);
@@ -110,6 +115,9 @@ for i =1:rand_max %For each digit
         %Normalize pixel from 0-255
         r(c,1) = 255*(Result(c,1) -minimum)/(maximum-minimum);
     end
+    
+    %reverse spiral
+    r= reverse_Spiral_Image(r);
     
     %Display the result
     subplot(rand_max, parameters,counter);
@@ -121,4 +129,7 @@ for i =1:rand_max %For each digit
     imshow(img);
     title(['Output PCA'  strnum]);
     counter= counter+1;
+    
+%      Y = sim(net.net,p);
+%      fprintf('Test for %d is: %f (mean %f)\n',i,Y,p);
 end

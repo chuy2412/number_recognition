@@ -53,7 +53,7 @@ X = [X0 X1];
 %DDJ = [0 1 2 3 4 5 6 7 8 9]
 DDJ = [0 1];    
 
-ETA = 0.000001;
+ETA = 0.0000001;
 [nInputs N] = size(X);
 [nOutputs N] = size(DDJ);
 nHidden = 20; %Two hidden units
@@ -78,7 +78,7 @@ Error_Steps=2;
 %Stopping Criteria: 10000 iterations or The error of the last 4 steps is 
 %Less than 4%
 fprintf('Starting Training Phase...\n');
-while((norm(Error_Steps)> 0.04) && (iterations < 1000))
+while((norm(Error_Steps)> 0.04) && (iterations <10000))
     Error_Steps=0; 
     for i = 1:N  
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,7 +97,7 @@ while((norm(Error_Steps)> 0.04) && (iterations < 1000))
            
            %Sigmoidal function for k
                %Ok(k) = netk(k)^3;
-               Ok(k) = 2/(1+exp(-netk(k))) -1;
+               Ok(k) = netk(k);%2/(1+exp(-netk(k))) -1;
            ek(k) = DDJ(k,i) - Ok(k); 
            
            %derivative of Sigmoidal of netk
@@ -176,7 +176,7 @@ for i = 1:2
         
         %Sigmoidal function for k
             %Ok(k) = netk(k)^3;
-            Ok(k) = 2/(1+exp(-netk(k))) -1;
+            Ok(k) = netk(k);%2/(1+exp(-netk(k))) -1;
         ek(k) = d(k,i) - Ok(k);
         
         %derivative of Sigmoidal of netk
